@@ -45,4 +45,16 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+
+    public function government()
+    {
+        return $this->hasOne(Government::class);
+    }
+
+    public function scopeNoGovernment($query)
+    {
+        $query->whereDoesntHave('government');
+    }
+
 }
