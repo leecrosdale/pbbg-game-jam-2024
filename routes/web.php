@@ -12,24 +12,23 @@ Route::get('/', function () {
 //    return view('dashboard');
 //})->middleware(['auth', 'verified'])->name('dashboard');
 
-
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+
+Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('dashboard', [\App\Http\Controllers\GovernmentController::class, 'index'])->name('dashboard');
 
-
     Route::group(['as' => 'client.'], function () {
         Route::resource('government-infrastructure', \App\Http\Controllers\GovernmentInfrastructureController::class);
-
-
+        Route::resource('government-resources', \App\Http\Controllers\GovernmentResourceController::class);
         Route::patch('government/population', [GovernmentController::class, 'populationUpdate'])->name('government.population.update');
+        Route::get('government', [GovernmentController::class, 'index'])->name('government.index');
     });
-
-
-
 });
 
 require __DIR__.'/auth.php';

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\GovernmentInfrastructure;
+use App\Models\Infrastructure;
 use Illuminate\Http\Request;
 
 class GovernmentInfrastructureController extends Controller
@@ -12,7 +13,15 @@ class GovernmentInfrastructureController extends Controller
      */
     public function index()
     {
-        //
+        $user = auth()->user();
+        $government = $user->government;
+        $infrastructures = $government->government_infrastructures;
+
+
+        $unbuiltInfrastructures = Infrastructure::whereNotIn('id', $infrastructures->pluck('infrastructure_id'))->get();
+
+
+        return view('government.index', compact('infrastructures', 'government', 'unbuiltInfrastructures'));
     }
 
     /**

@@ -1,125 +1,78 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+        <h2 class="font-semibold text-2xl text-gray-800 dark:text-gray-200 mb-6">
             {{ __('Dashboard') }}
         </h2>
     </x-slot>
 
-    @include('components.alert')
 
-    <div class="flex justify-center mb-6">
-        <div class="flex space-x-4 w-full max-w-xl">
-            <!-- Population -->
-            <div class="p-4 bg-white dark:bg-black dark:text-white rounded shadow text-center flex-1">
-                <h2 class="text-lg font-semibold">Population (Available / Assigned)</h2>
-                <p class="text-2xl font-bold text-green-600">{{ $government->available_population }} / {{ $government->population }}</p>
+    <x-government-overview :government="$government" />
+
+    <!-- Add a margin / gap here -->
+
+    <div class="flex flex-wrap gap-6 mb-8 px-4 mt-8"> <!-- Add top margin here to create space -->
+        @foreach($government->government_infrastructures as $infra)
+            <div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow text-center flex-1 max-w-xs">
+                @method('patch')
+                @csrf
+                <img src="{{ url('images/infrastructures/' . \Illuminate\Support\Str::slug($infra->infrastructure->name)) . '.png' }}" class="mb-4 w-16 mx-auto" />
+                <h4 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">{{ $infra->infrastructure->name }}</h4>
+                <p class="text-gray-500 dark:text-gray-400 mt-2">Assigned: {{ $infra->population }}</p>
+                <p class="text-gray-500 dark:text-gray-400 mt-2">Upgrade: ${{ number_format($infra->upgrade_cost, 2) }}</p>
             </div>
-
-            <div class="p-4 bg-white dark:bg-black dark:text-white rounded shadow text-center flex-1">
-                <h2 class="text-lg font-semibold">Overall Rating</h2>
-                <p class="text-2xl font-bold text-green-600">{{ $government->overall }}</p>
-            </div>
-
-            <!-- Money -->
-            <div class="p-4 bg-white dark:bg-black dark:text-white rounded shadow text-center flex-1">
-                <h2 class="text-lg font-semibold">Money</h2>
-                <p class="text-2xl font-bold text-yellow-600">${{ $government->money }}</p>
-            </div>
-        </div>
-    </div>
-    <div class="flex mb-6">
-        <div class="flex w-full max-w-xl">
-            @foreach($government->government_infrastructures as $infra)
-
-                <form method="post" action="{{ route('client.government-infrastructure.update', $infra) }}">
-                    @method('patch')
-                    @csrf
-                    <div class="p-4 bg-white dark:bg-black dark:text-white rounded shadow text-center flex-1">
-                        <img src="{{ url('images/infrastructures/' . \Illuminate\Support\Str::slug($infra->infrastructure->name)) . '.png' }}" />
-                        <h2 class="text-lg font-semibold">{{ $infra->infrastructure->name }} - {{ $infra->infrastructure->type }}</h2>
-                        <p class="text-2xl font-bold text-green-600">{{ $infra->level }} * {{ $infra->population }} = {{ $infra->next_tick }}</p>
-                        <p class="text-2xl font-bold text-green-600">Upgrade Cost: ${{ number_format($infra->upgrade_cost, 2) }}</p>
-                        <input type="number" id="population" name="population" min="0" class="mt-2 p-2 border rounded w-full text-black">
-                        <button type="submit">Set Population</button>
-                    </div>
-                </form>
-            @endforeach
-        </div>
+        @endforeach
     </div>
 
-    <div class="flex mb-6">
-        <div class="flex w-full max-w-xl">
-            @foreach($government->government_resources as $resource)
-                <div class="p-4 bg-white dark:bg-black dark:text-white rounded shadow text-center">
-                    <img src="{{ url('images/resources/' . \Illuminate\Support\Str::slug($resource->resource->name) . '.png') }}" />
-                    <h2 class="text-lg font-semibold">{{ $resource->resource->name }}</h2>
-                    <p class="text-2xl font-bold text-green-600">{{ $resource->amount }}</p>
-                </div>
-            @endforeach
-        </div>
+
+    <div class="flex flex-wrap gap-6 mb-8 px-4">
+        @foreach($government->government_resources as $resource)
+            <div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow text-center max-w-xs">
+                <img src="{{ url('images/resources/' . \Illuminate\Support\Str::slug($resource->resource->name) . '.png') }}" class="mb-4 w-16 mx-auto" />
+                <h4 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3">{{ $resource->resource->name }}</h4>
+                <p class="text-xl font-bold text-teal-500">{{ $resource->amount }}</p>
+            </div>
+        @endforeach
     </div>
 
-    <div class="bg-white p-6 rounded shadow mb-6 dark:bg-black ">
-        <h2 class="text-xl font-semibold mb-4 dark:text-white">Sector Levels</h2>
+    <div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow mb-8">
+        <h4 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Sector Levels</h4>
         <form action="#" method="POST">
             @csrf
-            @php
-                $economy = $government->getStatChange('economy');
-                $health = $government->getStatChange('health');
-                $safety = $government->getStatChange('safety');
-                $education = $government->getStatChange('education');
-            @endphp
-
-            <div class="flex w-full max-w-xl">
-                <div class="p-4 bg-white dark:bg-black dark:text-white rounded shadow text-center flex-1">
-                    <img src="{{ url('images/sectors/economy.png') }}" />
-                    <label for="economy" class="block text-sm font-medium text-gray-700 dark:text-white">Economy</label>
-                    <p class="text-2xl font-bold text-green-600">{{ $government->economy }} {{ $economy['icon'] }}{{ $economy['change'] }}</p>
-                </div>
-                <div class="p-4 bg-white dark:bg-black dark:text-white rounded shadow text-center flex-1">
-                    <img src="{{ url('images/sectors/health.png') }}" />
-                    <label for="health" class="block text-sm font-medium text-gray-700 dark:text-white">Health</label>
-                    <p class="text-2xl font-bold text-green-600">{{ $government->health }} {{ $health['icon'] }}{{ $health['change'] }}</p>
-                </div>
-                <div class="p-4 bg-white dark:bg-black dark:text-white rounded shadow text-center flex-1">
-                    <img src="{{ url('images/sectors/safety.png') }}" />
-                    <label for="safety" class="block text-sm font-medium text-gray-700 dark:text-white">Safety</label>
-                    <p class="text-2xl font-bold text-green-600">{{ $government->safety }} {{ $safety['icon'] }}{{ $safety['change'] }}</p>
-                </div>
-                <div class="p-4 bg-white dark:bg-black dark:text-white rounded shadow text-center flex-1">
-                    <img src="{{ url('images/sectors/education.png') }}" />
-                    <label for="education" class="block text-sm font-medium text-gray-700 dark:text-white">Education</label>
-                    <p class="text-2xl font-bold text-green-600">{{ $government->education }} {{ $education['icon'] }}{{ $education['change'] }}</p>
-                </div>
+            <div class="flex space-x-6">
+                @php
+                    $stats = [
+                        'economy' => $government->getStatChange('economy'),
+                        'health' => $government->getStatChange('health'),
+                        'safety' => $government->getStatChange('safety'),
+                        'education' => $government->getStatChange('education'),
+                    ];
+                @endphp
+                @foreach ($stats as $name => $stat)
+                    <div class="p-6 bg-white dark:bg-gray-700 rounded-lg shadow text-center flex-1">
+                        <img src="{{ url('images/sectors/' . $name . '.png') }}" class="w-12 mx-auto mb-4" />
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-300">{{ ucfirst($name) }}</label>
+                        <p class="text-xl font-bold text-teal-500">Change: {{ $stat['icon'] }}{{ $stat['change'] }}</p>
+                    </div>
+                @endforeach
             </div>
         </form>
     </div>
 
-    <div class="bg-white p-6 rounded shadow mb-6 dark:bg-black">
-        <h2 class="text-xl font-semibold mb-4 dark:text-white">Sector Population Allocation</h2>
+    <div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow mb-8">
+        <h4 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Sector Population Allocation</h4>
         <form action="{{ route('client.government.population.update') }}" method="POST">
             @method('patch')
             @csrf
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                <div>
-                    <label for="economy" class="block text-sm font-medium text-gray-700 dark:text-white">Economy</label>
-                    <input type="number" id="economy" name="economy" value="{{ $government->economy_population }}" min="0" class="mt-1 p-2 border rounded w-full">
-                </div>
-                <div>
-                    <label for="health" class="block text-sm font-medium text-gray-700 dark:text-white">Health</label>
-                    <input type="number" id="health" name="health" value="{{ $government->health_population }}" min="0" class="mt-1 p-2 border rounded w-full">
-                </div>
-                <div>
-                    <label for="safety" class="block text-sm font-medium text-gray-700 dark:text-white">Safety</label>
-                    <input type="number" id="safety" name="safety" value="{{ $government->safety_population }}" min="0" class="mt-1 p-2 border rounded w-full">
-                </div>
-                <div>
-                    <label for="education" class="block text-sm font-medium text-gray-700 dark:text-white">Education</label>
-                    <input type="number" id="education" name="education" value="{{ $government->education_population }}" min="0" class="mt-1 p-2 border rounded w-full">
-                </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                @foreach (['economy', 'health', 'safety', 'education'] as $sector)
+                    <div>
+                        <label for="{{ $sector }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ ucfirst($sector) }}</label>
+                        <input type="number" id="{{ $sector }}" name="{{ $sector }}" value="{{ $government->{$sector . '_population'} }}" min="0" class="mt-2 p-2 border rounded w-full text-black">
+                    </div>
+                @endforeach
             </div>
-            <div class="mt-4 text-center">
-                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Update Allocation</button>
+            <div class="mt-6 text-center">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Update Allocation</button>
             </div>
         </form>
     </div>
