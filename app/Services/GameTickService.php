@@ -12,9 +12,9 @@ class GameTickService
         $governments = Government::all();
 
         foreach ($governments as $government) {
-//            $government->calculatePopulationChange();
-//            $government->calculateResourceChange();
             $government->calculateStatsChange();
+            $government->calculatePopulationChange();
+            $government->calculateResourceChange();
         }
     }
 

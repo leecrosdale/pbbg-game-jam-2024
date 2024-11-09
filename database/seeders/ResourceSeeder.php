@@ -17,7 +17,7 @@ class ResourceSeeder extends Seeder
             'food',
             'electricity',
             'medicine',
-            'clothing'
+            'happiness'
         ];
 
 

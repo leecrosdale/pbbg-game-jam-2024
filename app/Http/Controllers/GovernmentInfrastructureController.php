@@ -52,7 +52,21 @@ class GovernmentInfrastructureController extends Controller
      */
     public function update(Request $request, GovernmentInfrastructure $governmentInfrastructure)
     {
-        //
+
+        $request->validate([
+            'population' => 'required|integer|min:0',
+        ]);
+
+
+        $population = (int) $request->population;
+
+        if (!$governmentInfrastructure->setPopulation($population)) {
+            return redirect()->back()->withErrors("Not enough population available.");
+        }
+
+        return redirect()->back()->with('status', "Set Population to {$population}.");
+
+
     }
 
     /**

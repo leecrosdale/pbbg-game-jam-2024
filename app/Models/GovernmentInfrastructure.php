@@ -19,19 +19,19 @@ class GovernmentInfrastructure extends Model
         return $this->belongsTo(Infrastructure::class);
     }
 
+    public function government()
+    {
+        return $this->belongsTo(Government::class);
+    }
+
 
     public function getNextTickAttribute()
     {
 
-        $base = $this->infrastructure->base; // Base happiness per level
-        $efficiency = $this->efficiency; // Scaling factor for population influence
-
-        // Calculate Happiness
-        $happiness = $base * $this->level * pow($this->population, $efficiency);
-
-        // Optional: Limit maximum happiness for balance
-        $max_happiness = 500;
-        return floor(min($happiness, $max_happiness));
+        $base = $this->infrastructure->base;
+        $increase = $base * $this->level * pow($this->population, 0.001);
+        $maxIncrease = 500;
+        return floor(min($increase, $maxIncrease));
 
     }
 
@@ -43,6 +43,43 @@ class GovernmentInfrastructure extends Model
 
         // Calculate the cost for the next efficiency upgrade
         return (int)($base_cost * pow($cost_multiplier, $this->efficiency));
+    }
+
+
+    public function setPopulation(int $population)
+    {
+
+        $currentPopulation = $this->population;
+
+        if ($population > $this->government->available_population ) {
+            return false;
+        }
+
+
+        $remaining = $currentPopulation - $population;
+
+//        if ($population < $this->population) {
+//            $remaining = $this->government->available_population + $population;
+//        } else if ($population > $this->population) {
+//            $remaining = $this->government->available_population - $population;
+//        }
+
+
+        $this->population = $population;
+        $this->save();
+
+
+        if ($remaining > 0) {
+            $this->government->available_population += $remaining;
+        } else if ($remaining < 0) {
+            $this->government->available_population -= abs($remaining);
+        }
+
+        $this->government->save();
+
+
+        return true;
+
     }
 
 }

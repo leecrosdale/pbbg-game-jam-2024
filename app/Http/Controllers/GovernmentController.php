@@ -21,6 +21,35 @@ class GovernmentController extends Controller
         return view('dashboard', compact('government', 'population'));
     }
 
+
+    public function populationUpdate(Request $request)
+    {
+
+        $request->validate([
+            'economy' => 'required|min:0|integer',
+            'health' => 'required|min:0|integer',
+            'safety' => 'required|min:0|integer',
+            'education' => 'required|min:0|integer',
+        ]);
+
+
+        $user = auth()->user();
+
+        $government = $user->government;
+
+        $economy = (int) $request->economy;
+        $health = (int) $request->health;
+        $safety = (int) $request->safety;
+        $education = (int) $request->education;
+
+        $government->updatePopulationAllocation($economy, $health, $safety, $education);
+
+        return redirect()->back()->with('status', 'Government population allocation updated');
+
+
+    }
+
+
     /**
      * Show the form for creating a new resource.
      */

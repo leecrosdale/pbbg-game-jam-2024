@@ -11,4 +11,13 @@ enum InfrastructureType : string
     case HEALTH = 'health';
 
 
+    case FOOD = 'food';
+
+    case ELECTRICITY = 'electricity';
+
+    case CLOTHING = 'clothing';
+
+    case MEDICINE = 'medicine';
+
+
 }

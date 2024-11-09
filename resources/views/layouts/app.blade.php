@@ -18,17 +18,8 @@
 <div class="min-h-screen bg-black text-green-500 dark:bg-black dark:text-green-500">
     @include('layouts.navigation')
 
-    <!-- Page Heading -->
-    {{--            @isset($header)--}}
-    {{--                <header class="bg-green-700 dark:bg-green-900 shadow">--}}
-    {{--                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-green-500 dark:text-green-500">--}}
-    {{--                        {{ $header }}--}}
-    {{--                    </div>--}}
-    {{--                </header>--}}
-    {{--            @endisset--}}
-
     <!-- Page Content -->
-    <main class="py-4 text-green-500 dark:text-green-500">
+    <main class="py-4 px-4 sm:px-6 lg:px-8">
         {{ $slot }}
     </main>
 </div>

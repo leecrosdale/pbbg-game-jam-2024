@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\GovernmentController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,6 +19,16 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('dashboard', [\App\Http\Controllers\GovernmentController::class, 'index'])->name('dashboard');
+
+
+    Route::group(['as' => 'client.'], function () {
+        Route::resource('government-infrastructure', \App\Http\Controllers\GovernmentInfrastructureController::class);
+
+
+        Route::patch('government/population', [GovernmentController::class, 'populationUpdate'])->name('government.population.update');
+    });
+
+
 
 });
 
