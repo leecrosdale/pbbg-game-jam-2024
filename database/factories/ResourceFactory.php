@@ -17,7 +17,7 @@ class ResourceFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'price' => $this->faker->randomFloat(2, 10, 100),
         ];
     }
 }

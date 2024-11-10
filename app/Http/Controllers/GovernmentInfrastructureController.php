@@ -18,10 +18,10 @@ class GovernmentInfrastructureController extends Controller
         $infrastructures = $government->government_infrastructures;
 
 
-        $unbuiltInfrastructures = Infrastructure::whereNotIn('id', $infrastructures->pluck('infrastructure_id'))->get();
+        $availableInfrastructures = Infrastructure::whereNotIn('id', $infrastructures->pluck('infrastructure_id'))->get();
 
 
-        return view('government.index', compact('infrastructures', 'government', 'unbuiltInfrastructures'));
+        return view('infrastructures.index', compact('infrastructures', 'government', 'availableInfrastructures'));
     }
 
     /**
@@ -32,12 +32,43 @@ class GovernmentInfrastructureController extends Controller
         //
     }
 
+    public function upgrade(Request $request, GovernmentInfrastructure $governmentInfrastructure)
+    {
+        dd($governmentInfrastructure);
+    }
+
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'infrastructure' => 'required|uuid'
+        ]);
+
+
+        $infrastructure = Infrastructure::where('uuid', $request->infrastructure)->firstOrFail();
+
+        $cost = $infrastructure->cost;
+
+        $user = auth()->user();
+        $government = $user->government;
+
+        if ($government->money < $cost) {
+            return redirect()->back()->withErrors('Not enough money to buy ' . $infrastructure->name);
+        }
+
+
+        $government->money -= $cost;
+        $government->save();
+
+
+        $government->government_infrastructures()->updateOrCreate([
+           'infrastructure_id' => $infrastructure->id,
+        ]);
+
+        return redirect()->back()->with('status', 'Purchased ' . $infrastructure->name);
+
     }
 
     /**

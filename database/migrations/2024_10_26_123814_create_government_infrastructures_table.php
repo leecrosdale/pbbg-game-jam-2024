@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignIdFor(\App\Models\Infrastructure::class)->constrained();
             $table->unsignedBigInteger('level')->default(1);
             $table->unsignedBigInteger('population')->default(0);
-            $table->decimal('efficiency')->default(0);
+            $table->decimal('efficiency')->default(100);
             $table->timestamps();
         });
     }

@@ -13,6 +13,7 @@ class GovernmentInfrastructure extends Model
     use HasFactory;
     use HasUuid;
 
+    protected $guarded = [];
 
     public function infrastructure()
     {
@@ -37,13 +38,19 @@ class GovernmentInfrastructure extends Model
 
     public function getUpgradeCostAttribute()
     {
-
         $base_cost = 100;
-        $cost_multiplier = 1.5;
+        $cost_multiplier = 1.2; // Reduced for a gentler cost increase
+        $efficiency_cap = 100;  // Cap efficiency at 100 for cost calculation
 
-        // Calculate the cost for the next efficiency upgrade
-        return (int)($base_cost * pow($cost_multiplier, $this->efficiency));
+        // Calculate adjusted efficiency for scaling
+        $adjusted_efficiency = min($this->efficiency, $efficiency_cap);
+
+        // Use a logarithmic or square root function for gradual cost increase
+        $cost = $base_cost * (1 + ($cost_multiplier * sqrt($adjusted_efficiency)));
+
+        return (int)$cost;
     }
+
 
 
     public function setPopulation(int $population)
@@ -55,19 +62,9 @@ class GovernmentInfrastructure extends Model
             return false;
         }
 
-
         $remaining = $currentPopulation - $population;
-
-//        if ($population < $this->population) {
-//            $remaining = $this->government->available_population + $population;
-//        } else if ($population > $this->population) {
-//            $remaining = $this->government->available_population - $population;
-//        }
-
-
         $this->population = $population;
         $this->save();
-
 
         if ($remaining > 0) {
             $this->government->available_population += $remaining;
@@ -76,7 +73,6 @@ class GovernmentInfrastructure extends Model
         }
 
         $this->government->save();
-
 
         return true;
 

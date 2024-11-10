@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Government;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -39,6 +40,12 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+        ]);
+
+        Government::create([
+            'user_id' => $user->id,
+            'name' => $request->name,
+            'available_population' => config('game.settings.starting_population')
         ]);
 
         event(new Registered($user));

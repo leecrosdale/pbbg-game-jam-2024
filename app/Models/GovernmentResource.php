@@ -12,6 +12,8 @@ class GovernmentResource extends Model
     use HasFactory;
     use HasUuid;
 
+    protected $guarded = [];
+
     public function resource()
     {
         return $this->belongsTo(Resource::class);
@@ -19,7 +21,14 @@ class GovernmentResource extends Model
 
     public function government()
     {
-        $this->belongsTo(Government::class);
+        return $this->belongsTo(Government::class);
+    }
+
+    public function getPopulationUsageAttribute()
+    {
+        /** @var Government $government */
+        $government = $this->government;
+        return $government->calculateResourceConsumption($this->resource->name)['required'][$this->resource->name];
     }
 
 }

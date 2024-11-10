@@ -61,7 +61,22 @@ class GovernmentResourceController extends Controller
      */
     public function update(Request $request, GovernmentResource $governmentResource)
     {
-        //
+        $amountToSell = $request->sell;
+        $governmentResource->amount -= $amountToSell;
+        $governmentResource->save();
+
+        $user = auth()->user();
+        $government = $user->government;
+
+        $price = $governmentResource->resource->price;
+
+        $government->money += $amountToSell * $price;
+        $government->save();
+
+        $total = $amountToSell * $price;
+
+        return redirect()->back()->with('status', "Sold {$amountToSell} of {$governmentResource->resource->name} for `$`{$total}");
+
     }
 
     /**

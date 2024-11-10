@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->uuid()->unique();
             $table->string('name');
+            $table->decimal('price');
             $table->timestamps();
         });
     }

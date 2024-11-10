@@ -22,7 +22,7 @@
                     <x-nav-link :href="route('client.government-resources.index')" :active="request()->routeIs('client.government-resources.index')">
                         {{ __('Resources') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('client.government.index')" :active="request()->routeIs('client.government.index')">
+                    <x-nav-link :href="route('leaderboard.index')" :active="request()->routeIs('leaderboard.index')">
                         {{ __('Governments') }}
                     </x-nav-link>
                 </div>

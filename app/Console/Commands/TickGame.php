@@ -28,9 +28,17 @@ class TickGame extends Command
     public function handle(): int
     {
 
-        Log::info('Game tick started');
-        app(GameTickService::class)->processTick();
-        Log::info('Game tick completed');
+
+        do {
+
+            Log::info('Game tick started');
+            app(GameTickService::class)->processTick();
+            Log::info('Game tick completed');
+
+            $this->comment('waiting 15 seconds');
+            sleep(15);
+
+        } while(true);
 
         return Command::SUCCESS;
 
