@@ -241,12 +241,14 @@ class Government extends Model
         // Ensure new level does not go below 0
         $newLevel = max(0, $newLevel);
 
-        return [
+        $data =  [
             'change' => $change,
             'new_level' => $newLevel,
             'seasonal_adjustment' => $seasonalAdjustment,
             'icon' => $increased,
         ];
+
+        return $data;
     }
 
 // Example function to retrieve seasonal adjustment (customize as needed)
@@ -342,9 +344,8 @@ class Government extends Model
 
         }
 
-        $averageChange = $totalChange / count($stats);
-
-        $this->overall += $averageChange;
+        
+        $this->overall += $totalChange;
 
         $this->save();
 

@@ -19,14 +19,14 @@ class InfrastructureSeeder extends Seeder
             [
                 'name' => 'Small Apartment Block',
                 'type' => InfrastructureType::HOUSING,
-                'cost' => 100,
+                'cost' => 1000,
                 'base' => 1.0, // Base production for the infrastructure
                 'resource_type' => 'happiness', // Resource produced
             ],
             [
                 'name' => 'Large Apartment Block',
                 'type' => InfrastructureType::HOUSING,
-                'cost' => 300,
+                'cost' => 3000,
                 'base' => 3.0, // Higher base production
                 'resource_type' => 'happiness',
             ],
@@ -35,14 +35,14 @@ class InfrastructureSeeder extends Seeder
             [
                 'name' => 'Farm',
                 'type' => InfrastructureType::FOOD,
-                'cost' => 50,
+                'cost' => 500,
                 'base' => 10.0, // Produces 10 food
                 'resource_type' => 'food',
             ],
             [
                 'name' => 'Food Processing Plant',
                 'type' => InfrastructureType::FOOD,
-                'cost' => 200,
+                'cost' => 2000,
                 'base' => 30.0, // Produces 30 food
                 'resource_type' => 'food',
             ],
@@ -51,14 +51,14 @@ class InfrastructureSeeder extends Seeder
             [
                 'name' => 'Power Station',
                 'type' => InfrastructureType::ELECTRICITY,
-                'cost' => 150,
+                'cost' => 1500,
                 'base' => 20.0, // Produces 20 electricity
                 'resource_type' => 'electricity',
             ],
             [
                 'name' => 'Solar Farm',
                 'type' => InfrastructureType::ELECTRICITY,
-                'cost' => 400,
+                'cost' => 4000,
                 'base' => 50.0, // Produces 50 electricity
                 'resource_type' => 'electricity',
             ],
@@ -67,14 +67,14 @@ class InfrastructureSeeder extends Seeder
             [
                 'name' => 'Hospital',
                 'type' => InfrastructureType::MEDICINE,
-                'cost' => 250,
+                'cost' => 2500,
                 'base' => 15.0, // Produces 15 medicine
                 'resource_type' => 'medicine',
             ],
             [
                 'name' => 'Pharmaceutical Factory',
                 'type' => InfrastructureType::MEDICINE,
-                'cost' => 500,
+                'cost' => 5000,
                 'base' => 40.0, // Produces 40 medicine
                 'resource_type' => 'medicine',
             ],
@@ -83,14 +83,14 @@ class InfrastructureSeeder extends Seeder
             [
                 'name' => 'Clothing Factory',
                 'type' => InfrastructureType::CLOTHING,
-                'cost' => 200,
+                'cost' => 2000,
                 'base' => 20.0, // Produces 20 clothing
                 'resource_type' => 'clothing',
             ],
             [
                 'name' => 'Textile Mill',
                 'type' => InfrastructureType::CLOTHING,
-                'cost' => 450,
+                'cost' => 4500,
                 'base' => 50.0, // Produces 50 clothing
                 'resource_type' => 'clothing',
             ],
