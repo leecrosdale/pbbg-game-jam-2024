@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\InfrastructureType;
 use App\Enums\Season;
 use App\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -78,12 +79,16 @@ class Government extends Model
     public function calculatePopulationChange()
     {
 
-        // Define scaling factor for population adjustment
-        $scaling_factor = 0.05; // Adjust this factor to control rate of population growth
+//        // Define scaling factor for population adjustment
+//        $scaling_factor = 0.5; // Adjust this factor to control rate of population growth
+//
+//        // Determine population change based on overall level
+//        // This example increases population slightly for each level, more at higher levels
+//        $population_change = round($this->overall * $scaling_factor);
 
-        // Determine population change based on overall level
-        // This example increases population slightly for each level, more at higher levels
-        $population_change = round($this->overall * $scaling_factor);
+        $population_change = $this->government_infrastructures()->whereHas('infrastructure', function($q) {
+            $q->where('type', InfrastructureType::HOUSING->value);
+        })->sum('level') - $this->population;
 
         return $population_change;
     }

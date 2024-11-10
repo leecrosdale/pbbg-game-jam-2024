@@ -34,32 +34,29 @@ class GovernmentInfrastructure extends Model
         $efficiency = $this->efficiency;
         $populationAssigned = $this->population;
 
-        // Calculate threshold for optimal resource production
-        $populationThreshold = max(pow($level, 1.5), 1);
-
+        $populationThreshold = 1;
         // Population impact: boosts production if population meets or exceeds the threshold
         $populationImpact = ($populationAssigned >= $populationThreshold)
             ? 1 + ($populationAssigned - $populationThreshold) / $populationThreshold
             : ($populationAssigned / $populationThreshold);
 
 
-        return round($baseOutput * $level * $efficiency * $populationImpact, 2);
+        return round($baseOutput * $efficiency * $populationImpact, 2) * $level;
 
     }
 
     public function getUpgradeCostAttribute()
     {
-        $base_cost = 100;
-        $cost_multiplier = 1.2; // Reduced for a gentler cost increase
-        $efficiency_cap = 100;  // Cap efficiency at 100 for cost calculation
+        $base_cost = 100;          // Set your base cost
+        $growth_factor = 1.5;      // This factor controls the exponential increase rate
+        $level = $this->level;     // Use your model's current level attribute
 
-        // Calculate adjusted efficiency for scaling
-        $adjusted_efficiency = min($this->efficiency, $efficiency_cap);
+        // Calculate the upgrade cost based on level and base cost
+        $upgrade_cost = (int) ($base_cost * pow($growth_factor, $level));
 
-        // Use a logarithmic or square root function for gradual cost increase
-        $cost = $base_cost * (1 + ($cost_multiplier * sqrt($adjusted_efficiency)));
+        $rounded_cost = round($upgrade_cost / 500) * 500;
 
-        return (int)$cost;
+        return $rounded_cost;
     }
 
 
@@ -69,11 +66,15 @@ class GovernmentInfrastructure extends Model
 
         $currentPopulation = $this->population;
 
-        if ($population > $this->government->available_population ) {
-            return false;
+        $remaining = $currentPopulation - $population;
+
+
+        if ($currentPopulation < $population) {
+            if (abs($remaining) > $this->government->available_population ) {
+                return false;
+            }
         }
 
-        $remaining = $currentPopulation - $population;
         $this->population = $population;
         $this->save();
 

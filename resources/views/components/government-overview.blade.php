@@ -8,11 +8,12 @@
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center flex-1">
             <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200">Overall Rating</h3>
             <p class="text-xl font-bold text-teal-500">{{ $government->overall }}</p>
+            <p>Change Next Tick {{ $government->c }}</p>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center flex-1">
             <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200">Money</h3>
-            <p class="text-xl font-bold text-yellow-500">${{ $government->money }}</p>
-            <p>(Change Next Tick: ${{ $government->calculateInterestAmount() }})</p>
+            <p class="text-xl font-bold text-yellow-500">${{ number_format($government->money) }}</p>
+            <p>(Change Next Tick: ${{ number_format($government->calculateInterestAmount()) }})</p>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center flex-1">
             <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200">Season</h3>
