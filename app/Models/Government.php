@@ -86,9 +86,11 @@ class Government extends Model
 //        // This example increases population slightly for each level, more at higher levels
 //        $population_change = round($this->overall * $scaling_factor);
 
-        $population_change = min(0,$this->government_infrastructures()->whereHas('infrastructure', function($q) {
+        $population_change = $this->government_infrastructures()->whereHas('infrastructure', function($q) {
             $q->where('type', InfrastructureType::HOUSING->value);
-        })->sum('level') - $this->population);
+        })->sum('level') - $this->population;
+
+        if ($population_change < 0) $population_change = 0;
 
         return $population_change;
     }
