@@ -72,8 +72,8 @@
             <div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow text-center max-w-xs">
                 <img src="{{ url('images/resources/' . \Illuminate\Support\Str::slug($resource->resource->name) . '.png') }}" class="mb-4 w-16 mx-auto" />
                 <h4 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3">{{ $resource->resource->name }}</h4>
-                <p class="text-xl font-bold text-teal-500">{{ $resource->amount }}</p>
-                <p class="text-xl font-bold text-teal-500">Pop usage next tick: {{ $resource->population_usage }}</p>
+                <p class="text-xl font-bold text-teal-500">{{ number_format($resource->amount) }}</p>
+                <p>Pop usage next tick: {{ $resource->population_usage }}</p>
 
             </div>
         @endforeach

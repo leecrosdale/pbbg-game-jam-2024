@@ -28,11 +28,22 @@ class GovernmentInfrastructure extends Model
 
     public function getNextTickAttribute()
     {
+        // Define base resource production values
+        $baseOutput = $this->infrastructure->base;  // Default production per tick for this type
+        $level = $this->level;
+        $efficiency = $this->efficiency;
+        $populationAssigned = $this->population;
 
-        $base = $this->infrastructure->base;
-        $increase = $base * $this->level * pow($this->population, 0.001);
-        $maxIncrease = 500;
-        return floor(min($increase, $maxIncrease));
+        // Calculate threshold for optimal resource production
+        $populationThreshold = max(pow($level, 1.5), 1);
+
+        // Population impact: boosts production if population meets or exceeds the threshold
+        $populationImpact = ($populationAssigned >= $populationThreshold)
+            ? 1 + ($populationAssigned - $populationThreshold) / $populationThreshold
+            : ($populationAssigned / $populationThreshold);
+
+
+        return round($baseOutput * $level * $efficiency * $populationImpact, 2);
 
     }
 

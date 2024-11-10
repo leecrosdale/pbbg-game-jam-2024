@@ -34,7 +34,25 @@ class GovernmentInfrastructureController extends Controller
 
     public function upgrade(Request $request, GovernmentInfrastructure $governmentInfrastructure)
     {
-        dd($governmentInfrastructure);
+
+        $user = auth()->user();
+        $government = $user->government;
+
+        $cost = $governmentInfrastructure->upgrade_cost;
+
+        if ($cost > $government->money) {
+            return redirect()->back()->withErrors('Not enough money');
+        }
+
+        $government->money -= $cost;
+        $government->save();
+
+        $governmentInfrastructure->level += 1;
+        $governmentInfrastructure->save();
+
+        return redirect()->back()->with('status', 'Upgraded');
+
+
     }
 
     /**

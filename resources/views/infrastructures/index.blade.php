@@ -13,8 +13,8 @@
                     @csrf
                     <img src="{{ url('images/infrastructures/' . \Illuminate\Support\Str::slug($infra->infrastructure->name)) . '.png' }}" class="mb-4 w-16 mx-auto" />
                     <h4 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">{{ $infra->infrastructure->name }}</h4>
-                    <p class="text-gray-500 dark:text-gray-400 mt-2">Assigned: {{ $infra->population }}</p>
-                    <p class="text-gray-500 dark:text-gray-400 mt-2">Generates: {{ $infra->infrastructure->resource_type }}</p>
+                    <p class="text-gray-500 dark:text-gray-400 mt-2">Pop Assigned: {{ $infra->population }}</p>
+                    <p class="text-gray-500 dark:text-gray-400 mt-2">Generates: {{ $infra->infrastructure->resource_type }} ({{$infra->next_tick}})</p>
                     <input type="number" name="population" min="0" class="mt-4 p-2 border rounded w-full text-black" value="{{ $infra->population }}">
                     <button type="submit" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded">Set</button>
                 </form>

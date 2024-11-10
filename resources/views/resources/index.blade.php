@@ -13,6 +13,7 @@
                 <h4 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3">{{ $resource->resource->name }}</h4>
                 <p class="text-xl font-bold text-teal-500">Amount: {{ $resource->amount }}</p>
                 <p class="text-xl font-bold text-teal-500">Value: ${{ $resource->resource->price }} each</p>
+                <p>Pop usage next tick: {{ $resource->population_usage }}</p>
                 <input type="number" name="sell" min="0" class="mt-4 p-2 border rounded w-full text-black" value="{{ $resource->amount }}">
                 <button type="submit" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded">Sell</button>
             </form>

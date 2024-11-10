@@ -100,37 +100,13 @@ class Government extends Model
         $resourceChanges = [];
 
         foreach ($this->government_infrastructures as $infrastructure) {
-            // Define base resource production values
-            $baseOutput = $infrastructure->infrastructure->base;  // Default production per tick for this type
-            $level = $infrastructure->level;
-            $efficiency = $infrastructure->efficiency;
-            $populationAssigned = $infrastructure->population;
-
-            // Calculate threshold for optimal resource production
-            $populationThreshold = max(pow($level, 1.5), 1);
-
-            // Population impact: boosts production if population meets or exceeds the threshold
-            $populationImpact = ($populationAssigned >= $populationThreshold)
-                ? 1 + ($populationAssigned - $populationThreshold) / $populationThreshold
-                : ($populationAssigned / $populationThreshold);
 
             // Final resource production calculation
-            $resourceGenerated = round($baseOutput * $level * $efficiency * $populationImpact, 2);
+            $resourceGenerated = $infrastructure->next_tick;;
 
             // Store the resource generated in the result array
             $resourceType = $infrastructure->infrastructure->resource_type;
             $resourceChanges[$resourceType] = ($resourceChanges[$resourceType] ?? 0) + $resourceGenerated;
-
-            Log::debug([
-                'Infrastructure' => $infrastructure->infrastructure->name,
-                'Base Output' => $baseOutput,
-                'Level' => $level,
-                'Efficiency' => $efficiency,
-                'Population Assigned' => $populationAssigned,
-                'Population Threshold' => $populationThreshold,
-                'Population Impact' => $populationImpact,
-                'Resource Generated' => $resourceGenerated,
-            ]);
 
         }
 
