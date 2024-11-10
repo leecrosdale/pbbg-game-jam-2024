@@ -51,14 +51,14 @@
     </div>
 
     <div class="container mx-auto py-8">
-        <h1 class="text-3xl font-bold mb-6">Economy Leaderboard</h1>
+        <h1 class="text-3xl font-bold mb-6">Health Leaderboard</h1>
 
         <table class="min-w-full bg-white rounded-lg shadow overflow-hidden">
             <thead>
             <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
                 <th class="py-3 px-6 text-left">Rank</th>
                 <th class="py-3 px-6 text-left">Government Name</th>
-                <th class="py-3 px-6 text-center">Economy Level</th>
+                <th class="py-3 px-6 text-center">Health Level</th>
                 {{--                <th class="py-3 px-6 text-center">Last Active</th>--}}
             </tr>
             </thead>
