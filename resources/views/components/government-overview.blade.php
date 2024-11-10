@@ -23,6 +23,7 @@
             <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200">Turn</h3>
             <p class="text-xl font-bold text-teal-500">{{ strtoupper((\App\Models\GameSetting::where('name', 'turn')->first()->value)) }}</p>
             <p>{{ strtoupper((\App\Models\GameSetting::where('name', 'turn_state')->first()->value)) }}</p>
+            <x-countdown></x-countdown>
         </div>
 
     </div>
