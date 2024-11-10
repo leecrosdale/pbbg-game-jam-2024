@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-guest-layout>
     <div class="container mx-auto py-8">
         <h1 class="text-3xl font-bold mb-6">Government Leaderboard</h1>
 
@@ -127,4 +127,4 @@
 
 
 
-</x-app-layout>
+</x-guest-layout>
