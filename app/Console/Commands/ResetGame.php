@@ -120,24 +120,24 @@ class ResetGame extends Command
         try {
             DB::beginTransaction();
 
-            // Delete all policies
+            // Delete all policies first (references governments)
             $policyCount = Policy::count();
-            Policy::truncate();
+            Policy::query()->delete();
             $this->line("✓ Deleted {$policyCount} policies");
 
-            // Delete all government infrastructure
+            // Delete all government infrastructure (references governments)
             $infraCount = GovernmentInfrastructure::count();
-            GovernmentInfrastructure::truncate();
+            GovernmentInfrastructure::query()->delete();
             $this->line("✓ Deleted {$infraCount} infrastructure items");
 
-            // Delete all government resources
+            // Delete all government resources (references governments)
             $resourceCount = GovernmentResource::count();
-            GovernmentResource::truncate();
+            GovernmentResource::query()->delete();
             $this->line("✓ Deleted {$resourceCount} resource records");
 
-            // Delete all governments
+            // Delete all governments (now safe since no foreign keys reference them)
             $governmentCount = Government::count();
-            Government::truncate();
+            Government::query()->delete();
             $this->line("✓ Deleted {$governmentCount} governments");
 
             // Create new governments for all users
@@ -172,7 +172,6 @@ class ResetGame extends Command
         $government = Government::create([
             'user_id' => $user->id,
             'name' => $user->name . "'s Government",
-            'population' => config('game.settings.starting_population', 100),
             'available_population' => config('game.settings.starting_population', 100),
             'money' => config('game.economy.starting_money', 1000),
             'economy' => 1,
@@ -194,7 +193,6 @@ class ResetGame extends Command
                 'government_id' => $government->id,
                 'resource_id' => $resource->id,
                 'amount' => $defaultAmount,
-                'population_usage' => 0,
             ]);
         }
     }
