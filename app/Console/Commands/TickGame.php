@@ -4,7 +4,8 @@ namespace App\Console\Commands;
 
 use App\Services\GameTickService;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Log;
+use App\Models\Government;
+use App\Models\GameSetting;
 
 class TickGame extends Command
 {
@@ -13,32 +14,64 @@ class TickGame extends Command
      *
      * @var string
      */
-    protected $signature = 'app:tick-game';
+    protected $signature = 'game:tick {--count=1 : Number of ticks to process}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Process game tick and update all governments';
 
     /**
      * Execute the console command.
      */
-    public function handle(): int
+    public function handle()
     {
+        $count = (int) $this->option('count');
+        $gameTickService = new GameTickService();
 
+        $this->info("Processing {$count} game tick(s)...");
 
-//        do {
+        for ($i = 0; $i < $count; $i++) {
+            $this->info("Processing tick " . ($i + 1) . "...");
+            
+            // Get current turn before processing
+            $currentTurn = GameSetting::where('name', 'turn')->value('value');
+            
+            $gameTickService->processTick();
+            
+            // Get updated turn
+            $newTurn = GameSetting::where('name', 'turn')->value('value');
+            
+            // Display balance information
+            $this->displayBalanceInfo();
+            
+            $this->info("Tick {$newTurn} completed successfully.");
+        }
 
-            Log::info('Game tick started');
-            app(GameTickService::class)->processTick();
-            Log::info('Game tick completed');
-//            sleep(15);
-//
-//        } while(true);
+        $this->info("Game tick processing completed!");
+    }
 
-        return Command::SUCCESS;
-
+    private function displayBalanceInfo()
+    {
+        $governments = Government::all();
+        
+        foreach ($governments as $government) {
+            $this->line("Government: {$government->name}");
+            $this->line("  Population: {$government->population}");
+            $this->line("  Money: {$government->money}");
+            $this->line("  Overall Score: {$government->overall}");
+            $this->line("  Sectors - Economy: {$government->economy}, Health: {$government->health}, Safety: {$government->safety}, Education: {$government->education}");
+            
+            // Display resource levels
+            $resources = $government->government_resources;
+            $resourceInfo = [];
+            foreach ($resources as $resource) {
+                $resourceInfo[] = "{$resource->resource->name}: {$resource->amount}";
+            }
+            $this->line("  Resources: " . implode(', ', $resourceInfo));
+            $this->line("");
+        }
     }
 }

@@ -29,6 +29,11 @@ class Government extends Model
         return $this->hasMany(GovernmentInfrastructure::class);
     }
 
+    public function policies()
+    {
+        return $this->hasMany(Policy::class);
+    }
+
     public function government_resources()
     {
         return $this->hasMany(GovernmentResource::class);
@@ -53,10 +58,10 @@ class Government extends Model
 
     public function calculateInterestAmount()
     {
-        $baseInterestRate = 0.01;
-        $scalingFactor = 0.01;
+        $baseInterestRate = 0.005; // Reduced from 0.01
+        $scalingFactor = 0.005; // Reduced from 0.01
         $interestRate = $baseInterestRate + ($this->overall * $scalingFactor);
-        $interestRate = min($interestRate, 0.2);
+        $interestRate = min($interestRate, config('game.settings.interest_rate_cap', 0.05)); // Use config cap
         $availableMoney = $this->money;
         $interestAmount = $availableMoney * $interestRate;
         return $interestAmount;
@@ -78,21 +83,56 @@ class Government extends Model
 
     public function calculatePopulationChange()
     {
-
-//        // Define scaling factor for population adjustment
-//        $scaling_factor = 0.5; // Adjust this factor to control rate of population growth
-//
-//        // Determine population change based on overall level
-//        // This example increases population slightly for each level, more at higher levels
-//        $population_change = round($this->overall * $scaling_factor);
-
-        $population_change = $this->government_infrastructures()->whereHas('infrastructure', function($q) {
+        // Get housing capacity
+        $housingCapacity = $this->government_infrastructures()->whereHas('infrastructure', function($q) {
             $q->where('type', InfrastructureType::HOUSING->value);
-        })->sum('level') - $this->population;
+        })->sum('level') * 10; // Each housing level supports 10 people
 
-        if ($population_change < 0) $population_change = 0;
+        // Calculate current population
+        $currentPopulation = $this->population;
+        
+        // Calculate potential growth based on available housing
+        $potentialGrowth = max(0, $housingCapacity - $currentPopulation);
+        
+        // Apply growth rate limit to prevent exponential growth
+        $maxGrowthRate = config('game.settings.max_population_growth_rate', 0.1);
+        $maxGrowth = $currentPopulation * $maxGrowthRate;
+        
+        // Also consider resource availability for population growth
+        $resourceFactor = $this->calculatePopulationGrowthResourceFactor();
+        
+        $populationChange = min($potentialGrowth, $maxGrowth) * $resourceFactor;
+        
+        return round($populationChange);
+    }
 
-        return $population_change;
+    private function calculatePopulationGrowthResourceFactor()
+    {
+        // Population growth is limited by resource availability
+        $requiredResources = [
+            'food' => 0.5,
+            'medicine' => 0.1,
+            'electricity' => 0.3
+        ];
+        
+        $minFactor = 1.0;
+        
+        foreach ($requiredResources as $resource => $required) {
+            $available = $this->getResourceAmount($resource);
+            $factor = $available >= $required ? 1.0 : max(0.1, $available / $required);
+            $minFactor = min($minFactor, $factor);
+        }
+        
+        return $minFactor;
+    }
+
+    private function getResourceAmount($resourceName)
+    {
+        $resource = $this->government_resources()->whereHas('resource', function($q) use ($resourceName) {
+            $q->where('name', $resourceName);
+        })->first();
+        
+        return $resource ? $resource->amount : 0;
     }
 
     public function applyPopulationChange($change)
@@ -107,24 +147,112 @@ class Government extends Model
         $resourceChanges = [];
 
         foreach ($this->government_infrastructures as $infrastructure) {
-
             // Final resource production calculation
-            $resourceGenerated = $infrastructure->next_tick;;
+            $resourceGenerated = $infrastructure->next_tick;
+
+            // Apply resource efficiency bonuses based on sector levels
+            $resourceGenerated = $this->applyResourceEfficiencyBonus($infrastructure->infrastructure->resource_type, $resourceGenerated);
 
             // Store the resource generated in the result array
             $resourceType = $infrastructure->infrastructure->resource_type;
             $resourceChanges[$resourceType] = ($resourceChanges[$resourceType] ?? 0) + $resourceGenerated;
-
         }
 
-        foreach ($resourceChanges as $resource => $amount)
-        {
+        foreach ($resourceChanges as $resource => $amount) {
             if ($amount <= 0) continue;
 
             $this->changeResourceAmount($resource, $amount);
         }
 
         return $resourceChanges;
+    }
+
+    private function applyResourceEfficiencyBonus($resourceType, $amount)
+    {
+        // Apply sector-based efficiency bonuses
+        $bonus = 1.0;
+        
+        switch ($resourceType) {
+            case 'food':
+                $bonus += $this->health * 0.02; // Health sector improves food production
+                break;
+            case 'electricity':
+                $bonus += $this->economy * 0.02; // Economy sector improves power generation
+                break;
+            case 'medicine':
+                $bonus += $this->education * 0.02; // Education sector improves medicine production
+                break;
+            case 'clothing':
+                $bonus += $this->economy * 0.01; // Economy sector improves clothing production
+                break;
+            case 'happiness':
+                $bonus += $this->safety * 0.02; // Safety sector improves happiness
+                break;
+        }
+        
+        return $amount * $bonus;
+    }
+
+    public function calculateHappinessEffect()
+    {
+        // Get happiness from government resources
+        $happinessResource = $this->government_resources()->whereHas('resource', function($q) {
+            $q->where('name', 'happiness');
+        })->first();
+        
+        $happiness = $happinessResource ? $happinessResource->amount : 0;
+        $population = $this->population;
+        
+        if ($happiness < 10) {
+            // Low happiness causes population decline and score penalty
+            $this->overall -= 1;
+            $this->available_population = max(0, $this->available_population - 1);
+        } elseif ($happiness > 80) {
+            // High happiness provides bonuses
+            $this->overall += 0.5;
+        }
+    }
+
+    public function checkForCrisis()
+    {
+        $crisisChance = 0.05; // 5% chance per tick
+        
+        if (rand(1, 100) <= $crisisChance * 100) {
+            $this->triggerRandomCrisis();
+        }
+    }
+
+    private function triggerRandomCrisis()
+    {
+        $crises = [
+            'economic_recession' => function() {
+                $this->economy = max(0, $this->economy - 2);
+                $this->money = max(0, $this->money * 0.8);
+                return 'Economic recession hit! Economy -2, Money -20%';
+            },
+            'health_emergency' => function() {
+                $this->health = max(0, $this->health - 2);
+                $this->medicine = max(0, $this->medicine * 0.7);
+                return 'Health emergency! Health -2, Medicine -30%';
+            },
+            'safety_incident' => function() {
+                $this->safety = max(0, $this->safety - 2);
+                $this->happiness = max(0, $this->happiness * 0.8);
+                return 'Safety incident! Safety -2, Happiness -20%';
+            },
+            'education_crisis' => function() {
+                $this->education = max(0, $this->education - 2);
+                return 'Education crisis! Education -2';
+            }
+        ];
+        
+        $crisis = array_rand($crises);
+        $message = $crises[$crisis]();
+        
+        // Log the crisis
+        \Log::info("Crisis triggered for government {$this->id}: {$message}");
+        
+        return $message;
     }
 
     // Example method for calculating production efficiency based on resources
@@ -139,14 +267,22 @@ class Government extends Model
 
     public function changeResourceAmount(string $resourceType, float $amount)
     {
-
         $resource = Resource::where('name', $resourceType)->first();
-
+        
+        if (!$resource) {
+            // Log the missing resource and return early
+            \Log::warning("Resource '{$resourceType}' not found in database");
+            return;
+        }
+        
         $governmentResource = $this->government_resources()->firstOrCreate(['resource_id' => $resource->id]);
-
-        $governmentResource->amount += $amount;
+        
+        // Apply storage capacity limits
+        $storageCapacity = config("game.resources.storage_capacity.{$resourceType}", 1000);
+        $newAmount = $governmentResource->amount + $amount;
+        $governmentResource->amount = min($newAmount, $storageCapacity);
+        
         $governmentResource->save();
-
     }
 
     public function calculateResourceConsumption($resourceType = null)
@@ -256,13 +392,14 @@ class Government extends Model
     {
         $seasonSetting = GameSetting::where('name', 'season')->value('value');
         $currentSeason = Season::from($seasonSetting);
+        $multiplier = config('game.settings.seasonal_impact_multiplier', 0.5);
 
-        // Apply specific seasonal effect based on sector
+        // Apply specific seasonal effect based on sector with reduced impact
         return match($currentSeason) {
-            Season::SPRING => ($sector === 'education') ? 1 : 0,
-            Season::SUMMER => ($sector === 'health') ? 1 : 0,
-            Season::AUTUMN => ($sector === 'safety') ? 1 : 0,
-            Season::WINTER => ($sector === 'economy') ? 1 : 0,
+            Season::SPRING => ($sector === 'education') ? 0.5 * $multiplier : 0,
+            Season::SUMMER => ($sector === 'health') ? 0.5 * $multiplier : 0,
+            Season::AUTUMN => ($sector === 'safety') ? 0.5 * $multiplier : 0,
+            Season::WINTER => ($sector === 'economy') ? 0.5 * $multiplier : 0,
             default => 0,
         };
     }
@@ -323,15 +460,11 @@ class Government extends Model
 
     public function calculateStatsChange()
     {
-
         $stats = config('game.stats.categories');
-
         $totalChange = 0;
 
         foreach ($stats as $stat) {
-
             $statIncrease = $this->calculateSectorChange($stat);
-
             $newLevel = $statIncrease['new_level'];
 
             if ($newLevel != 0) {
@@ -339,17 +472,36 @@ class Government extends Model
             }
 
             $this->{$stat} = $newLevel;
-
             $totalChange += $statIncrease['change'];
-
         }
 
+        // Generate money from sector levels
+        $moneyFromSectors = config('game.economy.money_from_sectors', 10);
+        $sectorMoney = ($this->economy + $this->health + $this->safety + $this->education) * $moneyFromSectors;
+        $this->money += $sectorMoney;
+        
+        // Apply infrastructure maintenance costs
+        $maintenanceCost = $this->calculateInfrastructureMaintenanceCost();
+        $this->money = max(0, $this->money - $maintenanceCost); // Prevent negative money
         
         $this->overall += $totalChange;
-
         $this->save();
-
     }
+
+    private function calculateInfrastructureMaintenanceCost()
+    {
+        $maintenanceRate = config('game.economy.infrastructure_maintenance_cost', 0.01);
+        $totalCost = 0;
+        
+        foreach ($this->government_infrastructures as $infrastructure) {
+            $baseCost = $infrastructure->infrastructure->cost;
+            $maintenanceCost = $baseCost * $maintenanceRate * $infrastructure->level;
+            $totalCost += $maintenanceCost;
+        }
+        
+        return $totalCost;
+    }
+
 
     public function updatePopulationAllocation(int $economy,int $health, int $safety, int $education)
     {

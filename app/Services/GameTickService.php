@@ -21,15 +21,30 @@ class GameTickService
 
         /** @var Government $government */
         foreach ($governments as $government) {
-
+            // Check for random crisis events
+            $government->checkForCrisis();
+            
+            // Process resource consumption and its effects
             $resourceConsumption = $government->calculateResourceConsumption();
             $government->applyResourceConsumption($resourceConsumption);
+            
+            // Calculate and apply happiness effects
+            $government->calculateHappinessEffect();
+            
+            // Process sector changes
             $government->calculateStatsChange();
+            
+            // Handle population changes
             $populationChange = $government->calculatePopulationChange();
             $government->applyPopulationChange($populationChange);
+            
+            // Process resource production
             $government->calculateResourceChange();
+            
+            // Apply interest on money
             $interestChange = $government->calculateInterestAmount();
             $government->applyInterest($interestChange);
+            
             $government->save();
         }
 
@@ -38,7 +53,6 @@ class GameTickService
         foreach ($resources as $resource) {
             $resource->adjustMarketPrices();
         }
-
 
         $gameSettingTick = GameSetting::where('name', 'turn')->first();
         $gameSettingTick->value = $gameSettingTick->value + 1;
@@ -51,10 +65,8 @@ class GameTickService
             $gameSettingSeason->save();
         }
 
-
         $gameSettingTurnState->value = TurnState::RUNNING->value;
         $gameSettingTurnState->save();
-
     }
 
 

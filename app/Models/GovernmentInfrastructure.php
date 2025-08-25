@@ -29,32 +29,44 @@ class GovernmentInfrastructure extends Model
     public function getNextTickAttribute()
     {
         // Define base resource production values
-        $baseOutput = $this->infrastructure->base;  // Default production per tick for this type
+        $baseOutput = $this->infrastructure->base;
         $level = $this->level;
         $efficiency = $this->efficiency;
         $populationAssigned = $this->population;
 
-        $populationThreshold = 1;
-        // Population impact: boosts production if population meets or exceeds the threshold
-        $populationImpact = ($populationAssigned >= $populationThreshold)
-            ? 1 + ($populationAssigned - $populationThreshold) / $populationThreshold
-            : ($populationAssigned / $populationThreshold);
+        // Apply efficiency decay with level increases
+        $efficiencyDecay = config('game.settings.infrastructure_efficiency_decay', 0.95);
+        $effectiveEfficiency = $efficiency * pow($efficiencyDecay, $level - 1);
 
+        // Improved population scaling - diminishing returns
+        $populationThreshold = max(1, $level * 2); // Threshold increases with level
+        $populationImpact = 1.0;
+        
+        if ($populationAssigned >= $populationThreshold) {
+            // Diminishing returns for excess population
+            $excessPopulation = $populationAssigned - $populationThreshold;
+            $populationImpact = 1.0 + (min($excessPopulation, $populationThreshold) / $populationThreshold) * 0.5;
+        } else {
+            // Penalty for insufficient population
+            $populationImpact = $populationAssigned / $populationThreshold;
+        }
 
-        return round($baseOutput * $efficiency * $populationImpact, 2) * $level;
+        // Apply level scaling with diminishing returns
+        $levelScaling = 1.0 + ($level - 1) * 0.5; // Linear scaling instead of exponential
 
+        return round($baseOutput * $effectiveEfficiency * $populationImpact * $levelScaling, 2);
     }
 
     public function getUpgradeCostAttribute()
     {
-        $base_cost = 100;          // Set your base cost
-        $growth_factor = 1.5;      // This factor controls the exponential increase rate
-        $level = $this->level;     // Use your model's current level attribute
+        $base_cost = $this->infrastructure->cost;
+        $growth_factor = 1.3; // Reduced from 1.5 for more reasonable scaling
+        $level = $this->level;
 
         // Calculate the upgrade cost based on level and base cost
-        $upgrade_cost = (int) ($base_cost * pow($growth_factor, $level));
+        $upgrade_cost = (int) ($base_cost * pow($growth_factor, $level - 1));
 
-        $rounded_cost = round($upgrade_cost / 500) * 500;
+        $rounded_cost = round($upgrade_cost / 100) * 100; // Round to nearest 100
 
         return $rounded_cost;
     }

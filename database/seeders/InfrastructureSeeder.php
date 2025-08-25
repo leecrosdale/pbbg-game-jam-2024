@@ -19,15 +19,15 @@ class InfrastructureSeeder extends Seeder
             [
                 'name' => 'Small Apartment Block',
                 'type' => InfrastructureType::HOUSING,
-                'cost' => 1000,
-                'base' => 1.0, // Base production for the infrastructure
-                'resource_type' => 'happiness', // Resource produced
+                'cost' => 2000,
+                'base' => 0.5, // Reduced from 1.0 - housing provides population capacity, not happiness
+                'resource_type' => 'happiness',
             ],
             [
                 'name' => 'Large Apartment Block',
                 'type' => InfrastructureType::HOUSING,
-                'cost' => 3000,
-                'base' => 3.0, // Higher base production
+                'cost' => 6000,
+                'base' => 1.5, // Reduced from 3.0
                 'resource_type' => 'happiness',
             ],
 
@@ -35,15 +35,15 @@ class InfrastructureSeeder extends Seeder
             [
                 'name' => 'Farm',
                 'type' => InfrastructureType::FOOD,
-                'cost' => 500,
-                'base' => 10.0, // Produces 10 food
+                'cost' => 1000,
+                'base' => 5.0, // Reduced from 10.0 - more realistic food production
                 'resource_type' => 'food',
             ],
             [
                 'name' => 'Food Processing Plant',
                 'type' => InfrastructureType::FOOD,
-                'cost' => 2000,
-                'base' => 30.0, // Produces 30 food
+                'cost' => 4000,
+                'base' => 15.0, // Reduced from 30.0
                 'resource_type' => 'food',
             ],
 
@@ -51,15 +51,15 @@ class InfrastructureSeeder extends Seeder
             [
                 'name' => 'Power Station',
                 'type' => InfrastructureType::ELECTRICITY,
-                'cost' => 1500,
-                'base' => 20.0, // Produces 20 electricity
+                'cost' => 3000,
+                'base' => 10.0, // Reduced from 20.0 - more realistic power generation
                 'resource_type' => 'electricity',
             ],
             [
                 'name' => 'Solar Farm',
                 'type' => InfrastructureType::ELECTRICITY,
-                'cost' => 4000,
-                'base' => 50.0, // Produces 50 electricity
+                'cost' => 8000,
+                'base' => 25.0, // Reduced from 50.0
                 'resource_type' => 'electricity',
             ],
 
@@ -67,15 +67,15 @@ class InfrastructureSeeder extends Seeder
             [
                 'name' => 'Hospital',
                 'type' => InfrastructureType::MEDICINE,
-                'cost' => 2500,
-                'base' => 15.0, // Produces 15 medicine
+                'cost' => 5000,
+                'base' => 8.0, // Reduced from 15.0 - medicine production is complex
                 'resource_type' => 'medicine',
             ],
             [
                 'name' => 'Pharmaceutical Factory',
                 'type' => InfrastructureType::MEDICINE,
-                'cost' => 5000,
-                'base' => 40.0, // Produces 40 medicine
+                'cost' => 10000,
+                'base' => 20.0, // Reduced from 40.0
                 'resource_type' => 'medicine',
             ],
 
@@ -83,28 +83,21 @@ class InfrastructureSeeder extends Seeder
             [
                 'name' => 'Clothing Factory',
                 'type' => InfrastructureType::CLOTHING,
-                'cost' => 2000,
-                'base' => 20.0, // Produces 20 clothing
+                'cost' => 4000,
+                'base' => 10.0, // Reduced from 20.0 - more realistic clothing production
                 'resource_type' => 'clothing',
             ],
             [
                 'name' => 'Textile Mill',
                 'type' => InfrastructureType::CLOTHING,
-                'cost' => 4500,
-                'base' => 50.0, // Produces 50 clothing
+                'cost' => 9000,
+                'base' => 25.0, // Reduced from 50.0
                 'resource_type' => 'clothing',
             ],
         ];
 
-
-
-
         foreach ($infrastructures as $infrastructure) {
-
             Infrastructure::factory()->create($infrastructure);
-
         }
-
     }
-
 }

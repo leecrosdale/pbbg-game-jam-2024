@@ -19,7 +19,13 @@ class GovernmentFactory extends Factory
     {
         return [
             'name' => $this->faker->city(),
-            'available_population' => $this->faker->numberBetween(100, 300),
+            'available_population' => config('game.settings.starting_population', 50),
+            'money' => config('game.economy.starting_money', 5000),
+            'economy' => 1,
+            'health' => 1,
+            'safety' => 1,
+            'education' => 1,
+            'overall' => 4,
             'user_id' => User::noGovernment()->inRandomOrder()->first()->id
         ];
     }

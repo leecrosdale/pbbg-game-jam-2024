@@ -17,7 +17,9 @@ class GovernmentInfrastructureFactory extends Factory
     public function definition(): array
     {
         return [
-            'level' => $this->faker->numberBetween(1,50)
+            'level' => 1, // Start at level 1 instead of random 1-50
+            'population' => 0,
+            'efficiency' => 100
         ];
     }
 }

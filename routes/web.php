@@ -1,6 +1,11 @@
 <?php
 
 use App\Http\Controllers\GovernmentController;
+use App\Http\Controllers\GovernmentInfrastructureController;
+use App\Http\Controllers\GovernmentResourceController;
+use App\Http\Controllers\GovernmentLeaderboardController;
+use App\Http\Controllers\PolicyController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -12,25 +17,34 @@ Route::get('/', function () {
 //    return view('dashboard');
 //})->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/leaderboard', [\App\Http\Controllers\GovernmentLeaderboardController::class, 'index'])->name('leaderboard.index');
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', [GovernmentController::class, 'index'])->name('dashboard');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/government-infrastructure', [GovernmentInfrastructureController::class, 'index'])->name('client.government-infrastructure.index');
+    Route::post('/government-infrastructure', [GovernmentInfrastructureController::class, 'store'])->name('client.government-infrastructure.store');
+    Route::patch('/government-infrastructure/{governmentInfrastructure}', [GovernmentInfrastructureController::class, 'update'])->name('client.government-infrastructure.update');
+    Route::post('/government-infrastructure/{governmentInfrastructure}/upgrade', [GovernmentInfrastructureController::class, 'upgrade'])->name('client.government-infrastructure.upgrade');
 
-    Route::get('dashboard', [\App\Http\Controllers\GovernmentController::class, 'index'])->name('dashboard');
+    Route::get('/government-resources', [GovernmentResourceController::class, 'index'])->name('client.government-resources.index');
+    Route::patch('/government-resources/{governmentResource}', [GovernmentResourceController::class, 'update'])->name('client.government-resources.update');
 
-    Route::group(['as' => 'client.'], function () {
-        Route::resource('government-infrastructure', \App\Http\Controllers\GovernmentInfrastructureController::class);
-        Route::post('government-infrastrucutre/{government_infrastructure}/upgrade', [\App\Http\Controllers\GovernmentInfrastructureController::class, 'upgrade'])->name('government-infrastructure.upgrade');
-        Route::resource('government-resources', \App\Http\Controllers\GovernmentResourceController::class);
-        Route::patch('government/population', [GovernmentController::class, 'populationUpdate'])->name('government.population.update');
-        Route::get('government', [GovernmentController::class, 'index'])->name('government.index');
-    });
+    Route::patch('/government/population', [GovernmentController::class, 'populationUpdate'])->name('client.government.population.update');
+
+    // New Policy Management Routes
+    Route::get('/policies', [PolicyController::class, 'index'])->name('policies.index');
+    Route::post('/policies/enact', [PolicyController::class, 'enact'])->name('policies.enact');
+    Route::delete('/policies/{policy}', [PolicyController::class, 'cancel'])->name('policies.cancel');
+
+    // New Reports Routes
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 });
+
+Route::get('/leaderboard', [GovernmentLeaderboardController::class, 'index'])->name('leaderboard.index');
 
 require __DIR__.'/auth.php';

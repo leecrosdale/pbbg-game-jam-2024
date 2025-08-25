@@ -17,7 +17,7 @@ class GovernmentResourceFactory extends Factory
     public function definition(): array
     {
         return [
-            'amount' => $this->faker->numberBetween(1,1000)
+            'amount' => $this->faker->numberBetween(50, 200) // Reduced from 1-1000 for more balanced start
         ];
     }
 }

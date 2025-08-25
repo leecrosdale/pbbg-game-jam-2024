@@ -17,16 +17,14 @@ class ResourceSeeder extends Seeder
             'food',
             'electricity',
             'medicine',
-            'happiness'
+            'happiness',
+            'clothing'
         ];
 
-
         foreach ($resources as $resource) {
-
             Resource::factory()->create([
                 'name' => $resource
             ]);
         }
-
     }
 }
