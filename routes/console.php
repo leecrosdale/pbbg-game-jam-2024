@@ -3,9 +3,9 @@
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote')->hourly();
+// Artisan::command('inspire', function () {
+//     $this->comment(Inspiring::quote());
+// })->purpose('Display an inspiring quote')->hourly();
 
 
-\Illuminate\Support\Facades\Schedule::command('app:tick-game')->everyFifteenMinutes();
+\Illuminate\Support\Facades\Schedule::command('game:tick')->everyFifteenMinutes();
